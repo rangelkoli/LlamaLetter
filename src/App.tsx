@@ -43,8 +43,8 @@ function App() {
   }
 
   return (
-    <ThemeProvider>
-      <div className='bg-background min-h-screen'>
+    <ThemeProvider defaultTheme='dark' storageKey='vite-ui-theme'>
+      <div className='min-h-screen'>
         <Router>
           <Routes>
             <Route
