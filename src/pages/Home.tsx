@@ -341,7 +341,7 @@ const Home = () => {
         <div className='md:mx-20 grid grid-cols-1 md:grid-cols-2 gap-8'>
           {/* Input Form Card */}
           <motion.div
-            className='p-6 rounded-xl shadow-lg transition-colors duration-200 bg-card'
+            className='p-6 rounded-xl shadow-lg transition-colors duration-200 bg-card text-card-foreground'
             initial={{ y: 20, opacity: 0 }}
             animate={{
               y: 0,
@@ -349,18 +349,18 @@ const Home = () => {
               transition: { delay: 0.3, duration: 0.5 },
             }}
           >
-            <h2 className='text-xl font-semibold mb-4 text-primary'>
+            <h2 className='text-xl font-semibold mb-4 text-foreground'>
               Input Information
             </h2>
 
             {error && (
-              <div className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4'>
+              <div className='bg-red-100 border border-red-400 text-red-700 dark:bg-red-900/20 dark:text-red-400 dark:border-red-500 px-4 py-3 rounded mb-4'>
                 {error}
               </div>
             )}
 
             {userCredits === 0 && !isSubscribed && (
-              <div className='bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-3 rounded mb-4'>
+              <div className='bg-yellow-100 border border-yellow-400 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-500 px-4 py-3 rounded mb-4'>
                 You've used all your credits. Purchase more to continue
                 generating cover letters.
               </div>
@@ -415,14 +415,15 @@ const Home = () => {
                 type='submit'
                 className={`w-full py-2 px-4 rounded-md focus:outline-none transition-colors duration-200 ${
                   isGenerating
-                    ? "bg-primary-foreground text-primary"
-                    : "bg-primary text-primary-foreground hover:bg-primary-hover"
+                    ? "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
+                    : "bg-primary text-primary-foreground hover:bg-primary/90"
                 }`}
+                disabled={isGenerating}
               >
                 {isGenerating ? (
                   <>
                     <svg
-                      className='animate-spin -ml-1 mr-3 h-5 w-5 text-primary-foreground'
+                      className='animate-spin -ml-1 mr-3 h-5 w-5 inline-block text-gray-600 dark:text-gray-300'
                       xmlns='http://www.w3.org/2000/svg'
                       fill='none'
                       viewBox='0 0 24 24'
@@ -444,15 +445,41 @@ const Home = () => {
                     Generating...
                   </>
                 ) : (
-                  `Generate Cover Letter (1 Credit)`
+                  `Generate Cover Letter`
                 )}
               </button>
+
+              {/* Display remaining free generations for free users */}
+              {!isSubscribed && typeof userCredits === "number" && (
+                <div className='mt-2 text-center'>
+                  <span
+                    className={`text-sm font-medium ${
+                      userCredits > 0
+                        ? "text-green-600 dark:text-green-400"
+                        : "text-red-600 dark:text-red-400"
+                    }`}
+                  >
+                    {userCredits > 0
+                      ? `You have ${userCredits} free ${
+                          userCredits === 1 ? "generation" : "generations"
+                        } left`
+                      : "No free generations left"}
+                  </span>
+                </div>
+              )}
+              {isSubscribed && (
+                <div className='mt-2 text-center'>
+                  <span className='text-sm font-medium text-green-600 dark:text-green-400'>
+                    Premium subscription - Unlimited generations
+                  </span>
+                </div>
+              )}
             </form>
           </motion.div>
 
           {/* Cover Letter Output Card */}
           <motion.div
-            className='p-6 rounded-xl shadow-lg transition-colors duration-200 bg-card'
+            className='p-6 rounded-xl shadow-lg transition-colors duration-200 bg-card text-card-foreground'
             initial={{ y: 20, opacity: 0 }}
             animate={{
               y: 0,
@@ -484,7 +511,7 @@ const Home = () => {
                   onClick={() => {
                     navigator.clipboard.writeText(coverLetter);
                   }}
-                  className='px-4 py-2 rounded-md text-sm flex items-center transition-colors duration-200 bg-secondary text-secondary-foreground hover:bg-secondary-hover'
+                  className='px-4 py-2 rounded-md text-sm flex items-center transition-colors duration-200 bg-secondary text-secondary-foreground hover:bg-secondary/90'
                 >
                   <svg
                     xmlns='http://www.w3.org/2000/svg'
@@ -504,7 +531,7 @@ const Home = () => {
                 </button>
                 <button
                   onClick={() => setIsPDFPreviewOpen(true)}
-                  className='bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary-hover transition-colors duration-200 text-sm flex items-center'
+                  className='bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors duration-200 text-sm flex items-center'
                   disabled={!pdfDocument}
                 >
                   <svg

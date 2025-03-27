@@ -88,7 +88,7 @@ const SubscriptionDisplay = ({
 
   if (loading) {
     return (
-      <div className='text-center p-6 text-gray-700 dark:text-gray-300 font-medium'>
+      <div className='text-center p-6 text-gray-600 dark:text-gray-300 font-medium'>
         Loading subscription information...
       </div>
     );
@@ -97,12 +97,12 @@ const SubscriptionDisplay = ({
   if (error) {
     return (
       <div className='p-6'>
-        <div className='text-red-500 dark:text-red-400 p-4 mb-4 border border-red-300 dark:border-red-500 rounded-lg bg-red-50 dark:bg-red-900'>
+        <div className='text-red-600 dark:text-red-400 p-4 mb-4 border border-red-300 dark:border-red-500 rounded-lg bg-red-50 dark:bg-red-900/20'>
           {error}
         </div>
         <button
           onClick={() => fetchSubscription()}
-          className='bg-blue-600 dark:bg-blue-700 text-white px-6 py-2 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-800 transition'
+          className='bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition'
         >
           Try Again
         </button>
@@ -114,15 +114,15 @@ const SubscriptionDisplay = ({
   if (!subscription) {
     return (
       <div className='p-6 border rounded-lg shadow-md bg-white dark:bg-gray-800'>
-        <h2 className='text-xl font-semibold mb-6 text-gray-800 dark:text-gray-200'>
+        <h2 className='text-xl font-semibold mb-6 text-gray-900 dark:text-gray-200'>
           Subscription Plan
         </h2>
 
         <div className='border rounded-lg p-6 flex flex-col bg-gray-50 dark:bg-gray-700 hover:shadow-lg transition'>
-          <h3 className='font-medium text-lg text-gray-800 dark:text-gray-200'>
+          <h3 className='font-medium text-lg text-gray-900 dark:text-gray-200'>
             Basic Plan
           </h3>
-          <p className='text-gray-600 dark:text-gray-400 mb-2'>
+          <p className='text-gray-700 dark:text-gray-400 mb-2'>
             Unlimited cover letters
           </p>
           <p className='text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100'>
@@ -131,13 +131,13 @@ const SubscriptionDisplay = ({
           <button
             onClick={() => handleSubscribe("price_1R6rbxSCmLDcSSiO3KZ0Bk84")}
             disabled={checkoutLoading}
-            className='mt-auto bg-blue-600 dark:bg-blue-700 text-white px-6 py-2 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-800 disabled:bg-gray-400 dark:disabled:bg-gray-600 transition'
+            className='mt-auto bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-800 disabled:bg-gray-400 dark:disabled:bg-gray-600 transition'
           >
             {checkoutLoading ? "Loading..." : "Subscribe"}
           </button>
         </div>
 
-        <div className='mt-6 text-sm text-gray-500 dark:text-gray-400'>
+        <div className='mt-6 text-sm text-gray-600 dark:text-gray-400'>
           <p>
             Note: The subscription plan uses test mode. For testing, use a
             Stripe test card like 4242 4242 4242 4242.
@@ -149,7 +149,7 @@ const SubscriptionDisplay = ({
 
   return (
     <div className='p-6 border rounded-lg shadow-md bg-white dark:bg-gray-800'>
-      <h2 className='text-xl font-semibold mb-6 text-gray-800 dark:text-gray-200'>
+      <h2 className='text-xl font-semibold mb-6 text-gray-900 dark:text-gray-200'>
         Your Subscription
       </h2>
 
@@ -166,10 +166,10 @@ const SubscriptionDisplay = ({
             {subscription.status === "active" ? "Active" : "Canceling"}
           </span>
         </p>
-        <p className='mb-2'>
+        <p className='mb-2 text-gray-700 dark:text-gray-300'>
           <span className='font-medium'>Plan:</span> {subscription.plan_id}
         </p>
-        <p className='mb-2'>
+        <p className='mb-2 text-gray-700 dark:text-gray-300'>
           <span className='font-medium'>Current period ends:</span>{" "}
           {new Date(subscription.current_period_end).toLocaleDateString()}
         </p>
@@ -186,7 +186,7 @@ const SubscriptionDisplay = ({
         <button
           onClick={handleCancelSubscription}
           disabled={canceling}
-          className='bg-red-600 dark:bg-red-700 text-white px-6 py-2 rounded-lg hover:bg-red-700 dark:hover:bg-red-800 disabled:bg-gray-400 dark:disabled:bg-gray-600 transition'
+          className='bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 dark:hover:bg-red-800 disabled:bg-gray-400 dark:disabled:bg-gray-600 transition'
         >
           {canceling ? "Processing..." : "Cancel Subscription"}
         </button>

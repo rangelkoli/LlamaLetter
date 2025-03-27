@@ -4,13 +4,11 @@ import { getUserProfile } from "@/lib/userService";
 import { UserProfile } from "@/lib/supabaseTypes";
 import SubscriptionDisplay from "@/components/SubscriptionDisplay";
 import Header from "@/components/Header";
-import { useTheme } from "@/components/theme-provider";
 
 const Credits = () => {
-  const { theme } = useTheme();
-
   const [user, setUser] = useState<UserProfile | null>(null);
   const [coverLetters, setCoverLetters] = useState<string[]>([]);
+
   useEffect(() => {
     const fetchUser = async () => {
       const profile = await getUserProfile();
@@ -39,17 +37,15 @@ const Credits = () => {
   };
 
   return (
-    <div
-      className={`min-h-screen ${
-        theme ? "bg-gray-900 text-white" : "bg-gray-100 text-black"
-      }`}
-    >
+    <div className='min-h-screen bg-background'>
       <Header handleSignOut={handleSignOut} user={user} />
-      <div className='max-w-4xl mx-auto'>
+      <div className='max-w-4xl mx-auto px-4'>
         {user?.id && <SubscriptionDisplay userId={user.id} />}
-        <div className='mt-8'>
-          <h2 className='text-xl font-bold'>Your Cover Letters</h2>
-          <ul className='list-disc pl-5 mt-4'>
+        <div className='mt-8 p-6 rounded-xl shadow-md bg-card'>
+          <h2 className='text-xl font-bold text-foreground'>
+            Your Cover Letters
+          </h2>
+          <ul className='list-disc pl-5 mt-4 text-foreground'>
             {coverLetters.length > 0 ? (
               coverLetters.map((title, index) => (
                 <li key={index} className='mb-2'>
@@ -57,7 +53,7 @@ const Credits = () => {
                 </li>
               ))
             ) : (
-              <p>No cover letters found.</p>
+              <p className='text-muted-foreground'>No cover letters found.</p>
             )}
           </ul>
         </div>
