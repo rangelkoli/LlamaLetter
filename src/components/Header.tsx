@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getUserSubscription, getUserCredits } from "@/lib/userService";
 import { ModeToggle } from "./mode-toggle";
-import { useTheme } from "./theme-provider";
 
 interface HeaderProps {
   handleSignOut: () => void;
@@ -14,7 +13,6 @@ const Header = ({ handleSignOut, user }: HeaderProps) => {
   const navigate = useNavigate();
   const [isPremium, setIsPremium] = useState(false);
   const [freeGenerations, setFreeGenerations] = useState<number | null>(null);
-  const { theme } = useTheme();
 
   const fetchUserData = async () => {
     // Check subscription status
