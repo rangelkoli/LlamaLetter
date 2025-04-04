@@ -3,7 +3,8 @@ CREATE TABLE user_profiles (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL UNIQUE,
-  credits INTEGER DEFAULT 5 NOT NULL
+  credits INTEGER DEFAULT 5 NOT NULL,
+  free_generations_left INTEGER DEFAULT 3 NOT NULL
 );
 
 -- Create credit_transactions table
@@ -20,8 +21,8 @@ CREATE TABLE credit_transactions (
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.user_profiles (user_id, credits)
-  VALUES (NEW.id, 5);
+  INSERT INTO public.user_profiles (user_id, credits, free_generations_left)
+  VALUES (NEW.id, 5, 3);
   
   INSERT INTO public.credit_transactions (user_id, amount, type, details)
   VALUES (NEW.id, 5, 'initial', 'Initial free credits');

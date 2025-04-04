@@ -23,17 +23,19 @@ const Signup = () => {
     }
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/`,
         },
       });
+      console.log("Signup data", data);
 
       if (error) throw error;
 
-      setMessage("Check your email for the confirmation link");
+      // User profile is automatically created by a database trigger
+      // when a new auth user is created, no need to manually create it
     } catch (error: any) {
       setError(error.message);
     } finally {
@@ -54,6 +56,9 @@ const Signup = () => {
       });
 
       if (error) throw error;
+
+      // User profile is automatically created by a database trigger
+      // when a new auth user is created via OAuth
     } catch (error: any) {
       setError(error.message);
     } finally {

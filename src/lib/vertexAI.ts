@@ -76,9 +76,60 @@ export const generateCoverLetter = async (
     for await (const chunk of response) {
       if (chunk.text) {
         onProgress(chunk.text);
-        console.log(chunk.text);
       }
     }
     return response;
   }
     
+export const generateAnswerstoQuestions = async (
+  resume: string,
+  jobDescription: string,
+  companyName: string,
+  question: string,
+  onProgress: (content: string) => void
+) =>{
+
+  const prompt = `
+You are an AI assistant designed to help job seekers prepare for interviews. You will be provided with a resume, a job description, and a company name. Your task is to answer interview questions in the first person, using the information from these documents to craft your responses. 
+     You will be provided with the following information:
+
+Resume: ${resume}
+Job Description: ${jobDescription}
+Company Name: ${companyName}
+Question: ${question}
+Instructions:
+
+1. Analyze the resume, job description, and research the company's values and mission.
+2. Answer interview questions using a first-person perspective ("I," "me," "my").
+3. Tailor your responses to align your skills and experiences (from the resume) with the requirements and responsibilities outlined in the job description.
+4. When answering questions about company interest, demonstrate genuine enthusiasm by referencing specific aspects of the company's values, mission, or work that resonate with you.
+5. If you encounter a question about salary expectations, provide a range based on industry standards and your experience level (as reflected in the resume).
+6. If you are unsure about any details, do not fabricate information. Instead, acknowledge the gap and express your willingness to learn more. For example, "While I haven't directly worked with [specific technology] before, I'm a quick learner and excited to expand my skillset in this area."
+7. Maintain a professional and positive tone throughout your responses.
+8. Use proper grammar and spelling.
+9. Ensure the letter flows logically from one section to the next.
+10. No more than 100 words.
+12. Avoid generic statements that could apply to any job.
+13. Don't explicitly label sections ("Introduction," "Body," etc.).
+
+
+`
+
+    const model = "gemini-2.5-pro-exp-03-25"
+    const ai = new GoogleGenAI({vertexai: false, apiKey: import.meta.env.VITE_GOOGLE_API_KEY});
+    const response = await ai.models.generateContentStream({
+      model: model,
+      contents: [{
+        text: prompt
+        }],
+      
+    });
+    for await (const chunk of response) {
+      if (chunk.text) {
+        onProgress(chunk.text);
+      }
+    }
+    return response;
+  
+  
+}

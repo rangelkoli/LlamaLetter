@@ -1,11 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { generateCoverLetter } from "@/lib/vertexAI";
-import {
-  getUserCredits,
-  useCredit,
-  hasActiveSubscription,
-} from "@/lib/userService";
+import { getUserCredits, hasActiveSubscription } from "@/lib/userService";
 import { BlockNoteSchema } from "@blocknote/core";
 import "@blocknote/core/fonts/inter.css";
 import { BlockNoteView } from "@blocknote/mantine";
@@ -19,11 +15,20 @@ import PDFPreview from "../components/PDFPreview";
 import { motion } from "framer-motion";
 import Header from "@/components/Header";
 import { useTheme } from "@/components/theme-provider";
+import QuestionAnswerComponent from "@/components/QuestionAnswerComponent";
+import useAppStore from "../store/resjjdstore";
+
 const Home = () => {
+  const {
+    resume,
+    jobDescription,
+    companyName,
+    setResume,
+    setJobDescription,
+    setCompanyName,
+  } = useAppStore();
+
   const [user, setUser] = useState<any>(null);
-  const [resume, setResume] = useState("");
-  const [jobDescription, setJobDescription] = useState("");
-  const [companyName, setCompanyName] = useState("");
   const [coverLetter, setCoverLetter] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,6 +39,7 @@ const Home = () => {
   const [isSubscribed, setIsSubscribed] = useState<boolean>(false);
   const { theme } = useTheme();
   const coverLetterRef = useRef<HTMLDivElement>(null);
+  const [tab, setTab] = useState<number>(2);
 
   useEffect(() => {
     const getUser = async () => {
@@ -134,6 +140,7 @@ const Home = () => {
           "after"
         );
         let buffer = "";
+
         await generateCoverLetter(
           resume,
           jobDescription,
@@ -201,104 +208,6 @@ const Home = () => {
         "You don't have enough credits. Please purchase more credits to continue."
       );
       return;
-    }
-    setError(null);
-    setIsGenerating(true);
-    setCoverLetter("");
-    try {
-      // Clear the editor content before generating new cover letter
-      const blockIds = editor.document.map((block) => block.id);
-      if (blockIds.length > 0) {
-        editor.removeBlocks(blockIds);
-      }
-      // Update the PDF view after clearing
-      onChange();
-      // Use a credit before generating if not subscribed
-      if (!isSubscribed) {
-        const creditUsed = await useCredit("Cover letter generation");
-        if (!creditUsed) {
-          throw new Error("Failed to use credit");
-        }
-        // Update local credit count
-        setUserCredits((prev) => prev - 1);
-      }
-      editor.insertBlocks(
-        [
-          {
-            type: "heading",
-            content: "Cover Letter",
-            props: {
-              level: 2,
-              textAlignment: "center",
-            },
-          },
-        ],
-        editor.document[editor.document.length - 1],
-        "after"
-      );
-      let buffer = "";
-      await generateCoverLetter(
-        resume,
-        jobDescription,
-        companyName,
-        (content) => {
-          // Append each streamed piece of text to the coverLetter state
-          setCoverLetter((prev) => prev + content);
-          // Add content to our buffer
-          buffer += content;
-          // Process buffer only if it contains newline characters
-          if (buffer.includes("\n")) {
-            const lines = buffer.split("\n");
-            // Process all complete lines except the last one
-            for (let i = 0; i < lines.length - 1; i++) {
-              if (lines[i].trim()) {
-                editor.insertBlocks(
-                  [
-                    {
-                      type: "paragraph",
-                      content: lines[i],
-                      props: {
-                        textAlignment: "justify",
-                      },
-                    },
-                  ],
-                  editor.document[editor.document.length - 1],
-                  "after"
-                );
-              }
-            }
-            // Keep the incomplete part in the buffer
-            buffer = lines[lines.length - 1];
-            // Trigger PDF update
-            onChange();
-          }
-        }
-      );
-      // Handle any remaining text in buffer after stream completes
-      if (buffer.trim()) {
-        editor.insertBlocks(
-          [
-            {
-              type: "paragraph",
-              content: buffer,
-              props: {
-                textAlignment: "justify",
-              },
-            },
-          ],
-          editor.document[editor.document.length - 1],
-          "after"
-        );
-        onChange();
-      }
-      // Save the newly generated cover letter to the database
-      if (coverLetter) {
-        saveCoverLetterDb();
-      }
-    } catch (error: any) {
-      setError("Failed to generate cover letter: " + error.message);
-    } finally {
-      setIsGenerating(false);
     }
   };
 
@@ -476,93 +385,134 @@ const Home = () => {
               )}
             </form>
           </motion.div>
-
-          {/* Cover Letter Output Card */}
-          <motion.div
-            className='p-6 rounded-xl shadow-lg transition-colors duration-200 bg-card text-card-foreground'
-            initial={{ y: 20, opacity: 0 }}
-            animate={{
-              y: 0,
-              opacity: 1,
-              transition: { delay: 0.5, duration: 0.5 },
-            }}
-          >
-            <h2 className='text-xl font-semibold mb-4 text-foreground'>
-              Your Cover Letter
-            </h2>
-            <div
-              ref={coverLetterRef}
-              className={`p-4 rounded border min-h-[500px] max-h-[500px] overflow-y-auto whitespace-pre-wrap ${
-                isGenerating ? "animate-pulse" : ""
-              } bg-muted border-border transition-colors duration-200`}
-            >
-              <BlockNoteView
-                editor={editor}
-                onChange={onChange}
-                theme={theme == "dark" ? "dark" : "light"}
-                style={{
-                  textAlign: "justify",
-                }}
-              ></BlockNoteView>
+          <div className='col-span-1'>
+            <div className='flex justify-center mb-4 h-10'>
+              <button
+                onClick={() => setTab(1)}
+                className={`px-4 py-2 rounded-md mx-2 ${
+                  tab === 1
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-secondary text-secondary-foreground"
+                }`}
+              >
+                Tab 1
+              </button>
+              <button
+                onClick={() => setTab(2)}
+                className={`px-4 py-2 rounded-md mx-2 ${
+                  tab === 2
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-secondary text-secondary-foreground"
+                }`}
+              >
+                Tab 2
+              </button>
             </div>
-            {coverLetter && (
-              <div className='mt-4 flex space-x-3'>
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(coverLetter);
-                  }}
-                  className='px-4 py-2 rounded-md text-sm flex items-center transition-colors duration-200 bg-secondary text-secondary-foreground hover:bg-secondary/90'
+            {tab == 1 && (
+              <motion.div
+                className='p-6 rounded-xl shadow-lg transition-colors duration-200 bg-card text-card-foreground'
+                initial={{ y: 20, opacity: 0 }}
+                animate={{
+                  y: 0,
+                  opacity: 1,
+                  transition: { delay: 0.1, duration: 0.5 },
+                }}
+              >
+                <h2 className='text-xl font-semibold mb-4 text-foreground'>
+                  Your Cover Letter
+                </h2>
+                <div
+                  ref={coverLetterRef}
+                  className={`p-4 rounded border min-h-[500px] max-h-[500px] overflow-y-auto whitespace-pre-wrap ${
+                    isGenerating ? "animate-pulse" : ""
+                  } bg-muted border-border transition-colors duration-200`}
                 >
-                  <svg
-                    xmlns='http://www.w3.org/2000/svg'
-                    className='h-4 w-4 mr-2'
-                    fill='none'
-                    viewBox='0 0 24 24'
-                    stroke='currentColor'
-                  >
-                    <path
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                      strokeWidth={2}
-                      d='M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3'
-                    />
-                  </svg>
-                  Copy to Clipboard
-                </button>
-                <button
-                  onClick={() => setIsPDFPreviewOpen(true)}
-                  className='bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors duration-200 text-sm flex items-center'
-                  disabled={!pdfDocument}
-                >
-                  <svg
-                    xmlns='http://www.w3.org/2000/svg'
-                    className='h-4 w-4 mr-2'
-                    fill='none'
-                    viewBox='0 0 24 24'
-                    stroke='currentColor'
-                  >
-                    <path
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                      strokeWidth={2}
-                      d='M15 12a3 3 0 11-6 0 3 3 0 016 0z'
-                    />
-                    <path
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                      strokeWidth={2}
-                      d='M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z'
-                    />
-                  </svg>
-                  Preview PDF
-                </button>
-              </div>
+                  <BlockNoteView
+                    editor={editor}
+                    onChange={onChange}
+                    theme={theme == "dark" ? "dark" : "light"}
+                    style={{
+                      textAlign: "justify",
+                    }}
+                  ></BlockNoteView>
+                </div>
+                {coverLetter && (
+                  <div className='mt-4 flex space-x-3'>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(coverLetter);
+                      }}
+                      className='px-4 py-2 rounded-md text-sm flex items-center transition-colors duration-200 bg-secondary text-secondary-foreground hover:bg-secondary/90'
+                    >
+                      <svg
+                        xmlns='http://www.w3.org/2000/svg'
+                        className='h-4 w-4 mr-2'
+                        fill='none'
+                        viewBox='0 0 24 24'
+                        stroke='currentColor'
+                      >
+                        <path
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                          strokeWidth={2}
+                          d='M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3'
+                        />
+                      </svg>
+                      Copy to Clipboard
+                    </button>
+                    <button
+                      onClick={() => setIsPDFPreviewOpen(true)}
+                      className='bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors duration-200 text-sm flex items-center'
+                      disabled={!pdfDocument}
+                    >
+                      <svg
+                        xmlns='http://www.w3.org/2000/svg'
+                        className='h-4 w-4 mr-2'
+                        fill='none'
+                        viewBox='0 0 24 24'
+                        stroke='currentColor'
+                      >
+                        <path
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                          strokeWidth={2}
+                          d='M15 12a3 3 0 11-6 0 3 3 0 016 0z'
+                        />
+                        <path
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                          strokeWidth={2}
+                          d='M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z'
+                        />
+                      </svg>
+                      Preview PDF
+                    </button>
+                  </div>
+                )}
+              </motion.div>
             )}
-          </motion.div>
+
+            {tab == 2 && (
+              <motion.div
+                className='p-6 rounded-xl shadow-lg transition-colors duration-200 bg-card text-card-foreground'
+                initial={{ y: 20, opacity: 0 }}
+                animate={{
+                  y: 0,
+                  opacity: 1,
+                  transition: { delay: 0.1, duration: 0.5 },
+                }}
+              >
+                <QuestionAnswerComponent
+                  resume={resume}
+                  jobDescription={jobDescription}
+                  companyName={companyName}
+                />
+              </motion.div>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* PDF Preview Modal */}
       <PDFPreview
         pdfDocument={pdfDocument}
         isOpen={isPDFPreviewOpen}
